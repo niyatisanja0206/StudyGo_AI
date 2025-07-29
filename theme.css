@@ -1,0 +1,70 @@
+/* Chat message styling - aligned left and larger font */
+.user-message, .ai-message {
+    padding: 1.2rem;
+    margin: 0.6rem 0;
+    border-radius: 8px;
+    border-left: 4px solid;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    text-align: left;
+}
+
+.user-message {
+    background-color: #c1dcf79e;
+    border-left-color: #007bff;
+    color: inherit;
+}
+
+.ai-message {
+    background-color: #c5f7cc9a;
+    border-left-color: #28a745;
+    color: inherit;
+}
+
+/* Welcome section with full boxed content */
+.welcome-section {
+    border: 1px solid #d3d3d3;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    background-color: transparent;
+    color: inherit;
+    text-align: center;
+}
+
+/* Make sure ALL child elements are in boxes */
+.welcome-section {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    color: inherit;
+    text-align: center;
+}
+
+.info-card{
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    color: inherit;
+    text-align: left;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .user-message, .ai-message {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+
+    .welcome-section {
+        padding: 1.2rem;
+    }
+
+    .welcome-section > * {
+        padding: 0.75rem;
+        font-size: 1rem;
+    }
+}
