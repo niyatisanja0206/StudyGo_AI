@@ -202,10 +202,14 @@ def chat_interface():
                 st.error(f"Error: {str(e)}")
 
         # Save chat if user is logged in
+        # Save chat only once per session if user is logged in
         if not is_guest and user_id:
-            # Use first user message as chat title, truncated
-            chat_title = st.session_state.chat_messages[0]["content"][:40] + "..." if len(st.session_state.chat_messages[0]["content"]) > 40 else st.session_state.chat_messages[0]["content"]
-            save_chat(user_id, chat_title, st.session_state.chat_messages, datetime.now().isoformat())
+            if "chat_saved" not in st.session_state or not st.session_state.chat_saved:
+                if len([m for m in st.session_state.chat_messages if m["role"] == "assistant"]) > 0:
+                    chat_title = st.session_state.chat_messages[0]["content"][:40] + "..." if len(st.session_state.chat_messages[0]["content"]) > 40 else st.session_state.chat_messages[0]["content"]
+                    save_chat(user_id, chat_title, st.session_state.chat_messages, datetime.now().isoformat())
+                    st.session_state.chat_saved = True
+
 
         st.rerun()
 
