@@ -15,8 +15,8 @@ def extract_json(text):
 
 def generate_schedule(topics_text, total_days, daily_hours):
     prompt_template = PromptTemplate(
-        input_variables=["topics", "days", "hours"],
-        template="""
+    input_variables=["topics", "days", "hours"],
+    template="""
 You are an intelligent study planning assistant.
 
 Your job is to help users break down serious academic or professional topics into a day-by-day study plan.
@@ -37,27 +37,28 @@ Please:
 
 Return only JSON in this format:
 ```json
-{
-  "schedule": {
+{{
+  "schedule": {{
     "Day 1": [
-      {"topic": "Intro to AI", "hours": 2}
+      {{"topic": "Intro to AI", "hours": 2}}
     ],
     "Day 2": [
-      {"topic": "Neural Networks", "hours": 3}
+      {{"topic": "Neural Networks", "hours": 3}}
     ]
-  },
+  }},
   "warning": false,
-  "minimum_needed": {
+  "minimum_needed": {{
     "days": 7,
     "daily_hours": 5
-  },
+  }},
   "tips": [
     "Use spaced repetition for better memory.",
     "Avoid multitasking during study blocks."
   ]
-}
+}}
 ```"""
     )
+
     chain = create_chain(prompt_template)
 
     response = chain.invoke({
