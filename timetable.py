@@ -9,52 +9,61 @@ import re
 from utils import load_css
 
 def extract_json(text):
-    """Extracts JSON from Markdown-style fenced code blocks."""
     match = re.search(r"```json(.*?)```", text, re.DOTALL)
     raw_json = match.group(1).strip() if match else text.strip()
     return json.loads(raw_json)
 
 def generate_schedule(topics_text, total_days, daily_hours):
-    total_hours = int(total_days) * int(daily_hours)
-
     prompt_template = PromptTemplate(
-        input_variables=["topics", "days", "hours", "total_hours"],
+        input_variables=["topics", "days", "hours"],
         template="""
-You are an expert study planning assistant.
+You are an intelligent study planning assistant.
 
-You must build a realistic, efficient daily study plan based on a list of academic or professional topics.
+Your job is to help users break down serious academic or professional topics into a day-by-day study plan.
 
-User Input:
-- Topics: {topics}
-- Available time: {days} days, {hours} hours/day
+The user wants to learn the following topics:
+{topics}
 
-Rules:
-1. Analyze each topic and break it into subtopics.
-2. Estimate the difficulty (easy/medium/hard).
-3. Allocate more time to harder or more complex topics.
-4. DO NOT divide time equally — adjust based on difficulty.
-5. If total available time is insufficient, still return a plan using all available time, but include a warning like:
-   "⚠️ Time is insufficient to fully cover these topics. Recommended minimum is X days at Y hours/day."
+They have {days} days and {hours} hours per day available.
 
-Return format:
+Please:
+1. Extract only valid academic or professional subjects and subtopics.
+2. Ignore or skip anything unrelated to education (e.g., movies, music, sports, entertainment, gossip).
+3. Estimate the difficulty of each topic (easy/medium/hard).
+4. Estimate total time required per topic (hard gets more time than easy).
+5. Check if the topics can reasonably fit in the total time available.
+6. If not, provide a schedule that fits the user's availability and add a flag to indicate a warning.
+7. Format response in strictly valid JSON. No comments, no extra text.
+
+Return only JSON in this format:
 ```json
-{{
-  "Day 1": [{{"topic": "...", "hours": ...}}],
-  "Day 2": [...],
-  ...
-  "warning": "..."  # optional, only if needed
-}}
-Only return valid JSON.
-"""
+{
+  "schedule": {
+    "Day 1": [
+      {"topic": "Intro to AI", "hours": 2}
+    ],
+    "Day 2": [
+      {"topic": "Neural Networks", "hours": 3}
+    ]
+  },
+  "warning": false,
+  "minimum_needed": {
+    "days": 7,
+    "daily_hours": 5
+  },
+  "tips": [
+    "Use spaced repetition for better memory.",
+    "Avoid multitasking during study blocks."
+  ]
+}
+```"""
     )
-
     chain = create_chain(prompt_template)
 
     response = chain.invoke({
         "topics": topics_text,
         "days": str(total_days),
-        "hours": str(daily_hours),
-        "total_hours": str(total_hours)
+        "hours": str(daily_hours)
     })
 
     try:
@@ -62,23 +71,6 @@ Only return valid JSON.
     except json.JSONDecodeError:
         st.error("⚠️ Could not parse JSON. Please try again.")
         return None
-
-def validate_schedule(schedule, total_days, daily_hours):
-    if not schedule:
-        return False
-
-    warning = schedule.get("warning", None)
-    if warning:
-        del schedule["warning"]
-
-    if len(schedule) > total_days:
-        return False
-
-    total_scheduled_hours = sum(
-        task["hours"] for tasks in schedule.values() for task in tasks
-    )
-
-    return total_scheduled_hours <= total_days * daily_hours
 
 def timetable_page():
     st.markdown("## 📆 AI-Powered Study Timetable")
@@ -97,7 +89,7 @@ def timetable_page():
                                         help="Maximum hours you can dedicate per day")
 
         name = st.text_input("🗂️ Optional name for this plan", 
-                           placeholder="e.g., 'Python Mastery', 'Data Science Bootcamp'")
+                             placeholder="e.g., 'Python Mastery', 'Data Science Bootcamp'")
 
         st.markdown('<div class="primary-button">', unsafe_allow_html=True)
         generate_clicked = st.button("🚀 Generate Timetable", use_container_width=True)
@@ -109,18 +101,19 @@ def timetable_page():
             return
 
         with st.spinner("🤖 AI is creating your personalized study plan..."):
-            schedule = generate_schedule(topics_text, total_days, daily_hours)
+            result = generate_schedule(topics_text, total_days, daily_hours)
 
-        if schedule:
-            warning = schedule.pop("warning", None)
-            if not validate_schedule(schedule, total_days, daily_hours):
-                st.error("❌ The generated timetable exceeds your available time or days. Please try again with simpler topics or more time.")
-                return
+        if result and "schedule" in result:
+            schedule = result["schedule"]
+            warning = result.get("warning", False)
+            tips = result.get("tips", [])
 
             st.success("✅ Timetable generated successfully!")
-
             if warning:
-                st.warning(f"⚠️ {warning}")
+                needed = result.get("minimum_needed", {})
+                min_days = needed.get("days", "?")
+                min_hours = needed.get("daily_hours", "?")
+                st.warning(f"⚠️ Your selected time may not be enough to learn everything effectively. Recommended: {min_days} days with {min_hours} hours/day.")
 
             st.markdown("### 📌 Your Personalized Study Plan")
             for day, tasks in schedule.items():
@@ -133,6 +126,11 @@ def timetable_page():
                     </div>
                     ''', unsafe_allow_html=True)
                 st.markdown('</div>', unsafe_allow_html=True)
+
+            if tips:
+                st.markdown("### 💡 Bonus Study Tips")
+                for tip in tips:
+                    st.markdown(f"- {tip}")
 
             if not st.session_state.get("is_guest", False):
                 user_id = st.session_state.get("user_id")
@@ -167,7 +165,6 @@ def display_saved_timetables():
     for plan_name, schedule in timetables.items():
         st.markdown(f'<div class="timetable-card">', unsafe_allow_html=True)
         st.markdown(f"### 📋 {plan_name}")
-
         total_days = len(schedule)
         total_hours = sum(sum(task['hours'] for task in tasks) for tasks in schedule.values())
         st.markdown(f"**Duration:** {total_days} days • **Total Study Time:** {total_hours} hours")
