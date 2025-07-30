@@ -20,32 +20,31 @@ def generate_schedule(topics_text, total_days, daily_hours):
     prompt_template = PromptTemplate(
         input_variables=["topics", "days", "hours", "total_hours"],
         template="""
-You are an intelligent study planning assistant.
+You are an expert study planning assistant.
 
-Your job is to break down serious academic or professional topics into a structured, daily study plan — customized to the user's time constraints.
+You must build a realistic, efficient daily study plan based on a list of academic or professional topics.
 
-📌 User Input:
+User Input:
 - Topics: {topics}
-- Available Time: {days} days, {hours} hours/day
+- Available time: {days} days, {hours} hours/day
 
-🎯 Your Responsibilities:
-1. Extract valid academic or professional topics only.
-2. Estimate each topic's difficulty: "easy", "medium", or "hard".
-3. Respect the time constraints: You may only use up to {total_hours} total hours (i.e., {days} days × {hours} hours/day).
-4. Allocate more hours to harder topics and fewer to easier ones.
-5. Distribute study sessions **only within the available {days} days**.
+Rules:
+1. Analyze each topic and break it into subtopics.
+2. Estimate the difficulty (easy/medium/hard).
+3. Allocate more time to harder or more complex topics.
+4. DO NOT divide time equally — adjust based on difficulty.
+5. If total available time is insufficient, still return a plan using all available time, but include a warning like:
+   "⚠️ Time is insufficient to fully cover these topics. Recommended minimum is X days at Y hours/day."
 
-⚠️ If the total time is not sufficient to learn all topics in depth, still create the best compressed plan you can, but include a note in the JSON under a \"warning\" field like this:
-"warning": "These topics typically require 10 days and 4 hours/day. Your current plan may be too tight for complete understanding."
-
-Return only valid JSON like this:
+Return format:
 ```json
 {{
-  "Day 1": [{{"topic": "Basics of Python", "hours": 2}}],
-  "Day 2": [{{"topic": "Object-Oriented Programming", "hours": 3}}],
-  "warning": "Optional warning if needed"
+  "Day 1": [{{"topic": "...", "hours": ...}}],
+  "Day 2": [...],
+  ...
+  "warning": "..."  # optional, only if needed
 }}
-Do NOT return any text, markdown, or explanations — only the JSON.
+Only return valid JSON.
 """
     )
 
