@@ -180,7 +180,7 @@ def chat_interface():
             ''', unsafe_allow_html=True)
 
     # Chat input
-    user_query = st.chat_input("💬 Ask your study question here... (e.g., 'Explain photosynthesis' or 'Help me learn JavaScript')")
+    user_query = st.chat_input("💬 Ask your study question here... ")
 
     if user_query:
         # Add user message
