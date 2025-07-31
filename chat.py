@@ -213,7 +213,13 @@ def chat_interface():
             
             try:
                 response = chain.invoke({"history": history, "query": user_query})
-                ai_msg = response["text"]
+
+                # Safely extract response text
+                if isinstance(response, dict):
+                    ai_msg = response.get("text") or response.get("content") or str(response)
+                else:
+                    ai_msg = str(response)
+
                 st.session_state.chat_messages.append({"role": "assistant", "content": ai_msg})
             except Exception as e:
                 error_msg = "I apologize, but I encountered an error processing your request. Please try rephrasing your question or try again in a moment."
