@@ -24,9 +24,9 @@ Your role is to help users:
   > "I'm here to help you plan your studies or professional learning. Please ask about topics like math, science, technology, language learning, or other educational goals."
 
 Stay focused, helpful, and professional.
-\n
-Chat History:\n{history}\n
-New Question:\n{query}\n
+
+Chat History:{history}
+New Question:{query}
 Give a helpful, structured answer suitable for a learning plan.
 """
     )
