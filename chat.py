@@ -6,7 +6,7 @@ from langchain.prompts import PromptTemplate
 from llm_utils import create_chain
 from utils import load_css, load_chats, save_chat, delete_chat
 import json
-import traceback  # ✅ Added for better error reporting
+import traceback  
 
 load_css()
 

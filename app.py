@@ -10,7 +10,7 @@ from chat import chat_interface
 st.set_page_config(page_title="StudyGo AI", layout="wide", page_icon="🎓")
 load_css()
 
-# 🌟 Show login/signup + welcome if not authenticated
+# Show login/signup + welcome if not authenticated
 if "user_id" not in st.session_state and "is_guest" not in st.session_state:
     with st.sidebar:
         show_auth_ui()
