@@ -174,7 +174,7 @@ def chat_interface():
                 error_msg = "I apologize, but I encountered an error processing your request."
                 st.session_state.chat_messages.append({"role": "assistant", "content": error_msg})
                 st.error("⚠️ Error occurred during chain invocation:")
-                st.code(traceback.format_exc(), language="python")  # ✅ Show full traceback
+                st.code(traceback.format_exc(), language="python")  # Show full traceback
 
         if not is_guest and user_id:
             if "chat_saved" not in st.session_state or not st.session_state.chat_saved:
